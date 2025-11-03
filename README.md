@@ -1,6 +1,6 @@
 # CCR Plugin · OpenAI Responses Transformer
 
-[中文说明](./readme_cn.md)
+[中文说明](./README_CN.md)
 
 This repository packages a custom transformer for Claude Code Router that translates Claude Code requests to the OpenAI Responses API and adapts streaming responses back into Chat Completions format.
 
