@@ -1,32 +1,90 @@
-# CCR Plugin · OpenAI Responses Transformer
+# CCR 插件 · OpenAI Responses 转换器
 
-[中文说明](./README_CN.md)
+[English README](./README.md)
 
-This repository packages a custom transformer for Claude Code Router that translates Claude Code requests to the OpenAI Responses API and adapts streaming responses back into Chat Completions format.
+该仓库收录了自定义的 Claude Code Router 转换器 `responses-api`，用于将 Claude Code 的请求和流式响应转换为 OpenAI Responses API 兼容格式。如果这个项目对你有帮助，欢迎点个 ⭐️ 支持一下！
 
-If this plugin saves you time, please consider giving the repo a ⭐️!
+## 主要特性
 
-## Features
+- 保留 Claude Code 的系统指令、元数据以及 `max_tokens` 等上下文参数。
+- 将工具定义映射为 Responses API 需要的 `{ type: "function", name, parameters }` 结构，解决工具调用报错问题。
+- 支持 `response.output_item.added`、`response.function_call_arguments.delta` 等事件，能够在 Chat Completions 流中正确生成 `tool_calls` 增量。
 
-- Preserves system instructions, metadata, and token limits from Claude Code requests.
-- Normalizes tool definitions into the `{ type: "function", name, parameters }` schema required by the Responses API.
-- Reconstructs streaming `tool_calls` by interpreting `response.output_item.added` and `response.function_call_arguments.delta` events.
+## 使用方法
 
-## Installation
-
-1. Copy `.claude-code-router/plugins/responses-api.js` into your local Claude Code Router plugins directory, typically `~/.claude-code-router/plugins`.
-2. Register the transformer inside `~/.claude-code-router/config.json`:
+1. 将 `.claude-code-router/plugins/responses-api.js` 复制到本地的 Claude Code Router 配置目录（通常是 `~/.claude-code-router/plugins`）。
+2. 在 `~/.claude-code-router/config.json` 中的 `transformers` 字段添加：
 
    ```json
    {
-     "transformers": [
-       { "path": "~/.claude-code-router/plugins/responses-api.js" }
-     ]
+     "path": "~/.claude-code-router/plugins/responses-api.js"
    }
    ```
 
-3. Restart Claude Code Router and test any workflow that requires tool execution.
+3. 重启 Claude Code Router，重新发起需要工具调用的请求以验证行为。
 
-## License
 
-Released under the [MIT License](./LICENSE).
+## 注意
+
+```json
+{
+  "API_TIMEOUT_MS": 600000,
+  "LOG": true,
+  "Providers": [
+    {
+      "name": "codex-responses",
+      "api_base_url": "https://right.codes/codex/v1/responses",
+      "api_key": "$RIGHTCODE_CCR_API_KEY",
+      "models": ["gpt-5.2"],
+      "transformer": {
+        "use": ["responses-api", {"reasoning_effort": "xhigh"}]
+      }
+    }
+  ],
+  "transformers": [
+    {
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+    }
+  ],
+  "Router": {
+    "default": "codex-responses,gpt-5.2"
+  }
+}
+```
+config.json 格式不允许修改，不可以进行格式化如下格式
+```json
+{
+  "API_TIMEOUT_MS": 600000,
+  "LOG": true,
+  "Providers": [
+    {
+      "name": "codex-responses",
+      "api_base_url": "https://right.codes/codex/v1/responses",
+      "api_key": "$RIGHTCODE_CCR_API_KEY",
+      "models": [
+        "gpt-5.2"
+      ],
+      "transformer": {
+        "use": [
+          "responses-api",
+          {
+            "reasoning_effort": "xhigh"
+          }
+        ]
+      }
+    }
+  ],
+  "transformers": [
+    {
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+    }
+  ],
+  "Router": {
+    "default": "codex-responses,gpt-5.2"
+  }
+}
+```
+
+## 许可协议
+
+本项目遵循 [MIT License](./LICENSE)。
