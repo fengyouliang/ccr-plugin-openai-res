@@ -23,6 +23,68 @@
 
 3. 重启 Claude Code Router，重新发起需要工具调用的请求以验证行为。
 
+
+## 注意
+
+```json
+{
+  "API_TIMEOUT_MS": 600000,
+  "LOG": true,
+  "Providers": [
+    {
+      "name": "codex-responses",
+      "api_base_url": "https://right.codes/codex/v1/responses",
+      "api_key": "$RIGHTCODE_CCR_API_KEY",
+      "models": ["gpt-5.2"],
+      "transformer": {
+        "use": ["responses-api", {"reasoning_effort": "xhigh"}]
+      }
+    }
+  ],
+  "transformers": [
+    {
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+    }
+  ],
+  "Router": {
+    "default": "codex-responses,gpt-5.2"
+  }
+}
+```
+config.json 格式不允许修改，不可以进行格式化如下格式
+```json
+{
+  "API_TIMEOUT_MS": 600000,
+  "LOG": true,
+  "Providers": [
+    {
+      "name": "codex-responses",
+      "api_base_url": "https://right.codes/codex/v1/responses",
+      "api_key": "$RIGHTCODE_CCR_API_KEY",
+      "models": [
+        "gpt-5.2"
+      ],
+      "transformer": {
+        "use": [
+          "responses-api",
+          {
+            "reasoning_effort": "xhigh"
+          }
+        ]
+      }
+    }
+  ],
+  "transformers": [
+    {
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+    }
+  ],
+  "Router": {
+    "default": "codex-responses,gpt-5.2"
+  }
+}
+```
+
 ## 许可协议
 
 本项目遵循 [MIT License](./LICENSE)。
