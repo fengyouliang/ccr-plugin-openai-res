@@ -311,8 +311,21 @@ class ResponsesAPITransformer {
       delete request.reasoning.max_tokens;
     }
 
-    if (typeof effort === "string" && effort.trim()) {
-      body.reasoning = { effort };
+    // 从 transformer options 读默认值（来自 config.json）
+    const defaultEffort =
+      this.options?.reasoning_effort ||
+      this.options?.effort ||
+      this.options?.reasoning?.effort;
+
+    // request 优先，其次 default
+    const finalEffort = (typeof effort === "string" && effort.trim())
+      ? effort.trim()
+      : (typeof defaultEffort === "string" && defaultEffort.trim())
+        ? defaultEffort.trim()
+        : undefined;
+
+    if (finalEffort) {
+      body.reasoning = { effort: finalEffort };
     } else if (enabled) {
       body.reasoning = { effort: "medium" };
     }
