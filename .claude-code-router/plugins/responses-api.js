@@ -291,6 +291,33 @@ class ResponsesAPITransformer {
       body.user = request.user;
     }
 
+    // ===== Fix: sanitize CCR-style reasoning.enabled for Responses API =====
+    const flatEnabled = request["reasoning.enabled"];
+    const flatEffort = request["reasoning.effort"];
+
+    const enabled =
+      (request.reasoning && typeof request.reasoning === "object" && request.reasoning.enabled === true) ||
+      flatEnabled === true;
+
+    const effort =
+      (request.reasoning && typeof request.reasoning === "object" ? request.reasoning.effort : undefined) ||
+      flatEffort;
+
+    delete request["reasoning.enabled"];
+    delete request["reasoning.effort"];
+
+    if (request.reasoning && typeof request.reasoning === "object") {
+      delete request.reasoning.enabled;
+      delete request.reasoning.max_tokens;
+    }
+
+    if (typeof effort === "string" && effort.trim()) {
+      body.reasoning = { effort };
+    } else if (enabled) {
+      body.reasoning = { effort: "medium" };
+    }
+    // ===== End fix =====
+    
     if (request.reasoning !== undefined) {
       body.reasoning = request.reasoning;
     }
