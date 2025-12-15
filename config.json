@@ -8,13 +8,14 @@
       "api_key": "$RIGHTCODE_CCR_API_KEY",
       "models": ["gpt-5.2"],
       "transformer": {
-        "use": ["responses-api", {"reasoning_effort": "xhigh"}]
+        "use": ["responses-api"]
       }
     }
   ],
   "transformers": [
     {
-      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js",
+      "options": {"reasoning_effort": "xhigh"}
     }
   ],
   "Router": {

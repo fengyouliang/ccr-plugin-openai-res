@@ -291,49 +291,79 @@ class ResponsesAPITransformer {
       body.user = request.user;
     }
 
-    // ===== Fix: sanitize CCR-style reasoning.enabled for Responses API =====
-    const flatEnabled = request["reasoning.enabled"];
-    const flatEffort = request["reasoning.effort"];
+	    // ===== Fix: sanitize CCR-style reasoning.enabled for Responses API =====
+	    const flatEnabled = request["reasoning.enabled"];
+	    const flatEffort = request["reasoning.effort"];
+	    const requestReasoningEffort = request.reasoning_effort || request.reasoningEffort;
 
     const enabled =
       (request.reasoning && typeof request.reasoning === "object" && request.reasoning.enabled === true) ||
       flatEnabled === true;
 
-    const effort =
-      (request.reasoning && typeof request.reasoning === "object" ? request.reasoning.effort : undefined) ||
-      flatEffort;
+	    const effort =
+	      (request.reasoning && typeof request.reasoning === "object" ? request.reasoning.effort : undefined) ||
+	      flatEffort ||
+	      requestReasoningEffort;
 
-    delete request["reasoning.enabled"];
-    delete request["reasoning.effort"];
+	    delete request["reasoning.enabled"];
+	    delete request["reasoning.effort"];
+	    delete request.reasoning_effort;
+	    delete request.reasoningEffort;
 
     if (request.reasoning && typeof request.reasoning === "object") {
       delete request.reasoning.enabled;
       delete request.reasoning.max_tokens;
     }
 
-    // 从 transformer options 读默认值（来自 config.json）
-    const defaultEffort =
-      this.options?.reasoning_effort ||
-      this.options?.effort ||
-      this.options?.reasoning?.effort;
+	    // 从 transformer options 读默认值（来自 config.json）
+	    const defaultEffort =
+	      this.options?.reasoning_effort ||
+	      this.options?.effort ||
+	      this.options?.reasoning?.effort;
 
-    // request 优先，其次 default
-    const finalEffort = (typeof effort === "string" && effort.trim())
-      ? effort.trim()
-      : (typeof defaultEffort === "string" && defaultEffort.trim())
-        ? defaultEffort.trim()
-        : undefined;
+	    const normalizedEffort = typeof effort === "string" ? effort.trim() : "";
+	    const normalizedDefaultEffort = typeof defaultEffort === "string" ? defaultEffort.trim() : "";
+	    const isStdEffort = (v) => v === "low" || v === "medium" || v === "high";
+	    const forceOptionEffort =
+	      this.options?.force_reasoning_effort === true ||
+	      this.options?.force_effort === true;
+
+	    // 默认：request 优先，其次 default。
+	    // 但如果 CCR 把未知档位（如 xhigh）clamp 成 high，则允许用 transformer 的 defaultEffort 覆盖回来。
+	    const shouldOverrideClampedStdEffort =
+	      !forceOptionEffort &&
+	      normalizedDefaultEffort &&
+	      !isStdEffort(normalizedDefaultEffort) &&
+	      normalizedEffort === "high";
+
+	    const finalEffort = forceOptionEffort
+	      ? (normalizedDefaultEffort || normalizedEffort || undefined)
+	      : shouldOverrideClampedStdEffort
+	        ? normalizedDefaultEffort
+	        : (normalizedEffort || normalizedDefaultEffort || undefined);
 
     if (finalEffort) {
       body.reasoning = { effort: finalEffort };
     } else if (enabled) {
       body.reasoning = { effort: "medium" };
     }
-    // ===== End fix =====
-    
-    if (request.reasoning !== undefined) {
-      body.reasoning = request.reasoning;
-    }
+	    // ===== End fix =====
+	    
+	    if (request.reasoning !== undefined) {
+	      const requestReasoning = request.reasoning;
+	      // Avoid clobbering the effort we just normalized above (CCR may send
+	      // `reasoning: { enabled: true }`, which becomes `{}` after sanitization).
+	      if (
+	        body.reasoning &&
+	        typeof body.reasoning === "object" &&
+	        requestReasoning &&
+	        typeof requestReasoning === "object"
+	      ) {
+	        body.reasoning = { ...requestReasoning, ...body.reasoning };
+	      } else if (body.reasoning === undefined) {
+	        body.reasoning = requestReasoning;
+	      }
+	    }
 
     if (request.modalities !== undefined) {
       body.modalities = request.modalities;

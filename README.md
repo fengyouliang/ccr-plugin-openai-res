@@ -37,13 +37,14 @@
       "api_key": "$RIGHTCODE_CCR_API_KEY",
       "models": ["gpt-5.2"],
       "transformer": {
-        "use": ["responses-api", {"reasoning_effort": "xhigh"}]
+        "use": ["responses-api"]
       }
     }
   ],
   "transformers": [
     {
-      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js",
+      "options": {"reasoning_effort": "xhigh"}
     }
   ],
   "Router": {
@@ -66,17 +67,17 @@ config.json 格式不允许修改，不可以进行格式化如下格式
       ],
       "transformer": {
         "use": [
-          "responses-api",
-          {
-            "reasoning_effort": "xhigh"
-          }
+          "responses-api"
         ]
       }
     }
   ],
   "transformers": [
     {
-      "path": "/home/feng/.claude-code-router/plugins/responses-api.js"
+      "path": "/home/feng/.claude-code-router/plugins/responses-api.js",
+      "options": {
+        "reasoning_effort": "xhigh"
+      }
     }
   ],
   "Router": {
