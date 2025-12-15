@@ -365,6 +365,49 @@ class ResponsesAPITransformer {
 	      }
 	    }
 
+	    // ===== Model options: reasoning summary & verbosity =====
+	    const normalizeLower = (value) =>
+	      typeof value === "string" ? value.trim().toLowerCase() : "";
+
+	    const optionReasoningSummary =
+	      this.options?.model_reasoning_summary ??
+	      this.options?.modelReasoningSummary;
+	    const optionVerbosity =
+	      this.options?.model_verbosity ??
+	      this.options?.modelVerbosity;
+
+	    delete request.model_reasoning_summary;
+	    delete request.modelReasoningSummary;
+	    delete request.model_verbosity;
+	    delete request.modelVerbosity;
+
+	    const supportsReasoningSummary =
+	      typeof model === "string" &&
+	      (model.startsWith("o") || model.startsWith("codex") || model.startsWith("gpt-5"));
+	    const supportsTextVerbosity =
+	      typeof model === "string" && model.startsWith("gpt-5");
+
+	    if (supportsReasoningSummary) {
+	      const candidate = normalizeLower(optionReasoningSummary) || "auto";
+	      const allowed = candidate === "auto" || candidate === "concise" || candidate === "detailed" || candidate === "none";
+	      if (allowed) {
+	        if (!body.reasoning || typeof body.reasoning !== "object") body.reasoning = {};
+	        body.reasoning.summary = candidate;
+	      }
+	    }
+
+	    if (supportsTextVerbosity) {
+	      const candidate = normalizeLower(optionVerbosity) || "medium";
+	      const allowed = candidate === "low" || candidate === "medium" || candidate === "high";
+	      if (allowed) {
+	        body.text = {
+	          ...(body.text && typeof body.text === "object" ? body.text : {}),
+	          verbosity: candidate
+	        };
+	      }
+	    }
+	    // ===== End model options =====
+
     if (request.modalities !== undefined) {
       body.modalities = request.modalities;
     }

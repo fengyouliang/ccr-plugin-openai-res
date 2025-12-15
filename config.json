@@ -15,7 +15,7 @@
   "transformers": [
     {
       "path": "/home/feng/.claude-code-router/plugins/responses-api.js",
-      "options": {"reasoning_effort": "xhigh"}
+      "options": {"reasoning_effort": "xhigh", "model_reasoning_summary": "auto", "model_verbosity": "high"}
     }
   ],
   "Router": {

@@ -44,7 +44,7 @@
   "transformers": [
     {
       "path": "/home/feng/.claude-code-router/plugins/responses-api.js",
-      "options": {"reasoning_effort": "xhigh"}
+      "options": {"reasoning_effort": "xhigh", "model_reasoning_summary": "auto", "model_verbosity": "medium"}
     }
   ],
   "Router": {
@@ -76,7 +76,9 @@ config.json 格式不允许修改，不可以进行格式化如下格式
     {
       "path": "/home/feng/.claude-code-router/plugins/responses-api.js",
       "options": {
-        "reasoning_effort": "xhigh"
+        "reasoning_effort": "xhigh",
+        "model_reasoning_summary": "auto",
+        "model_verbosity": "medium"
       }
     }
   ],
